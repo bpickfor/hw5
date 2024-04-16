@@ -100,6 +100,18 @@ void makewords(
     }
     else
     {
+        // get how many remaing dashes
+        int remainingspaces = count(in.begin() + idx, in.end(), '-');
+        int totalfloatingneeded = 0;
+        for (std::map<char, int>::const_iterator it = floating_ctr.begin(); it != floating_ctr.end(); ++it)
+        {
+            totalfloatingneeded += it->second;
+        }
+        if (totalfloatingneeded > remainingspaces)
+        {
+            return;
+        }
+
         // position has a dash, go thru all the lets
         for (char c = 'a'; c <= 'z'; c++)
         { // does this auto cast to ascii? a=97 z=122 in dec
