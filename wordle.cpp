@@ -25,7 +25,7 @@ void makewords(
     set<string> &results,
     const set<string> &dict,
     string current,
-    int idx;
+    int idx);
 
 // Definition of primary wordle function
 std::set<std::string> wordle(
@@ -52,7 +52,9 @@ std::set<std::string> wordle(
     // call helper
     // need the green letters, the yellow letters, a place (set) to store result word,
     // the dictionary of all valid words, the current string its building, and the index of the letter its on
-    makewords(in, floating_counter, results, dict, "", 0) return results;
+    // start cuurent string off empty
+    makewords(in, floating_counter, results, dict, "", 0);
+    return results;
 }
 
 // Define any helper functions here
@@ -66,19 +68,35 @@ void makewords(
     int idx)
 {
     // base case
-    if (idx == in.size())
-    {                            // if curr word is size of input word (aka complete)
-        results.insert(current); // add current word to results set
+    if (idx == in.size()) // if curr word is size of input word (aka complete)
+    {
+        if (dict.find(current) != dict.end()) // if word is valid (found in dictionary)
+        {
+            bool usedall = true; // track whether all eles in floating char map are used
+            for (std::map<char, int>::iterator it = floating_ctr.begin(); it != floating_ctr.end(); ++it)
+            {                       // iterator
+                if (it->second > 0) // check if letter has more times it needs to be used
+                {                   // it->second is the val (remem it->first is key), if val > 0 (aka letter hasnt been fully used)
+                    // if it needs to be used more
+                    usedall = false; // not all letters used
+                    break;
+                }
+            }
+            if (usedall)
+            {                            // if all floating chars used
+                results.insert(current); // add current word to results set
+            }
+        }
+
         return;
     }
 
-    // TODO: deal with floating chars?
     if (in[idx] != '-')
     {
         // green letter go next char:
         // append char at idx of in string to end of current (string concat)
         // move up index by 1 (use +1 bc its recursion, so dont want to modify curr val not ++idx, use new val yk?)
-        makewords(in, floating_ctr, results, dict, current + in[idx], idx + 1)
+        makewords(in, floating_ctr, results, dict, current + in[idx], idx + 1);
     }
     else
     {
@@ -86,7 +104,27 @@ void makewords(
         for (char c = 'a'; c <= 'z'; c++)
         { // does this auto cast to ascii? a=97 z=122 in dec
             // concat char to end of curr, move to next index
-            makewords(in, floating_ctr, results, dict, current + c, idx + 1);
+
+            // temporarily use letter
+            current.push_back(c);
+
+            // floating_ctr.count(c) returns wheter char c exists in the map or not
+            // and floating_ctr[c] > 0 checks that it still needs to be used
+            if (floating_ctr.count(c) && floating_ctr[c] > 0)
+            {
+                floating_ctr[c]--; // letter used, update count, this goes deeper
+                // go to next idx
+                // dont need to concat c and curr bc already added it to back
+                makewords(in, floating_ctr, results, dict, current, idx + 1);
+                floating_ctr[c]++; // put count back as if you didnt use it, this backtracks up shallower
+            }
+            else
+            {
+                // go to next idx
+                // dont need to concat c and curr bc already added it to back
+                makewords(in, floating_ctr, results, dict, current, idx + 1);
+            }
+            current.pop_back(); // remove this temp letter
         }
     }
 }
