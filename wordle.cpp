@@ -4,6 +4,7 @@
 // For std::remove
 #include <algorithm>
 #include <map>
+#include <unordered_map>
 #include <set>
 #endif
 #include "wordle.h"
@@ -19,7 +20,7 @@ using namespace std;
 // index pass by val bc each call needs its own copy of curr index bc its dif each branch, just like curr string
 void makewords(
     const string &in,
-    map<char, int> &floating_ctr,
+    unordered_map<char, int> &floating_ctr,
     set<string> &results,
     const set<string> &dict,
     string current,
@@ -34,16 +35,17 @@ std::set<std::string> wordle(
     // in is given to us, but it represents the green letters
     // floating represents the yellow letters
     // dict is a set of all the valid words
-    set<string> results;             // return type is a set of strings so need this to be a set of finished word strings
-    map<char, int> floating_counter; // yellow letter, times it needs to be used (ints not bools bc ex: what if you have multiple floating e's )
+    set<string> results;                       // return type is a set of strings so need this to be a set of finished word strings
+    unordered_map<char, int> floating_counter; // yellow letter, times it needs to be used (ints not bools bc ex: what if you have multiple floating e's )
     // put each letter from floating string into floating counter
     // from the start of floating until the end, walk the word
     for (size_t i = 0; i < floating.size(); i++)
     {
         // character c is that letter of floating
-        char c = floating[i];
+        // char c = floating[i];
         // floating counter (char int map) at index c is augmented (can)
-        floating_counter[c]++;
+        // floating_counter[c]++;
+        floating_counter[floating[i]]++;
     }
     // call helper
     // need the green letters, the yellow letters, a place (set) to store result word,
@@ -56,7 +58,7 @@ std::set<std::string> wordle(
 // helper function for making all the words
 void makewords(
     const string &in,
-    map<char, int> &floating_ctr,
+    unordered_map<char, int> &floating_ctr,
     set<string> &results,
     const set<string> &dict,
     string current,
@@ -68,7 +70,8 @@ void makewords(
         if (dict.find(current) != dict.end()) // if word is valid (found in dictionary)
         {
             bool usedall = true; // track whether all eles in floating char map are used
-            for (std::map<char, int>::iterator it = floating_ctr.begin(); it != floating_ctr.end(); ++it)
+            for (auto it = floating_ctr.begin(); it != floating_ctr.end(); ++it)
+            // for (std::map<char, int>::iterator it = floating_ctr.begin(); it != floating_ctr.end(); ++it)
             {                       // iterator
                 if (it->second > 0) // check if letter has more times it needs to be used
                 {                   // it->second is the val (remem it->first is key), if val > 0 (aka letter hasnt been fully used)
@@ -96,9 +99,11 @@ void makewords(
         // get how many remaing dashes
         int remainingspaces = count(in.begin() + idx, in.end(), '-');
         int totalfloatingneeded = 0;
-        for (std::map<char, int>::const_iterator it = floating_ctr.begin(); it != floating_ctr.end(); ++it)
+        for (const auto &it : floating_ctr)
+        // for (std::map<char, int>::const_iterator it = floating_ctr.begin(); it != floating_ctr.end(); ++it)
         {
-            totalfloatingneeded += it->second;
+            // totalfloatingneeded += it->second;
+            totalfloatingneeded += it.second;
         }
         if (totalfloatingneeded > remainingspaces)
         {
